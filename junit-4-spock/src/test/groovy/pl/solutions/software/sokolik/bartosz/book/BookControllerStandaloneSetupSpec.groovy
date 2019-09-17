@@ -1,30 +1,35 @@
 package pl.solutions.software.sokolik.bartosz.book
 
-import groovy.json.JsonBuilder
-import org.spockframework.spring.SpringBean
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+
+import groovy.json.JsonOutput
 import org.springframework.test.web.servlet.MockMvc
 import pl.solutions.software.sokolik.bartosz.book.domain.BookFacade
 import pl.solutions.software.sokolik.bartosz.book.domain.dto.AddBookRequest
 import pl.solutions.software.sokolik.bartosz.book.domain.dto.AddBookResponse
 import pl.solutions.software.sokolik.bartosz.book.domain.dto.BookDto
-import pl.solutions.software.sokolik.bartosz.book.domain.dto.BookNotFoundResponse
 
 import static com.jayway.jsonpath.JsonPath.read
 import static org.springframework.http.MediaType.APPLICATION_JSON
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup
 
-@WebMvcTest(BookController.class)
-class BookControllerSpec extends AbstractBookControllerSpec {
+class BookControllerStandaloneSetupSpec extends AbstractBookControllerSpec {
 
-    @Autowired
+    private BookFacade bookFacade
+
+    private BookController bookController
+
     private MockMvc mockMvc
 
-    @SpringBean
-    private BookFacade bookFacade = Mock()
+    def setup() {
+        bookFacade = Mock()
+        bookController = new BookController(bookFacade)
+
+        mockMvc = standaloneSetup(bookController).build()
+    }
 
     def "should create book"() {
         given:
@@ -37,21 +42,15 @@ class BookControllerSpec extends AbstractBookControllerSpec {
         when:
         def result = mockMvc.perform(post("/api/books")
                 .contentType(APPLICATION_JSON)
-                .content(new JsonBuilder(request).toPrettyString()))
+                .content(JsonOutput.toJson(request)))
 
         then:
         result.andExpect(status().isCreated())
+                .andExpect(jsonPath('$.message').value(BOOK_CREATED_MESSAGE))
+                .andExpect(jsonPath('$.id').value(ID.toString()))
 
         and:
-        def body = result.andReturn()
-                .getResponse()
-                .getContentAsString()
-
-        expected.getId().toString() == read(body, '$.id')
-        expected.getMessage() == read(body, '$.message')
-
-        and:
-        1 * bookFacade.addBook(_ as AddBookRequest) >> expected
+        1 * bookFacade.addBook(request) >> expected
     }
 
     def "should return book with given id"() {
@@ -66,7 +65,6 @@ class BookControllerSpec extends AbstractBookControllerSpec {
         then:
         result.andExpect(status().isOk())
 
-        and:
         def body = result.andReturn()
                 .getResponse()
                 .getContentAsString()
@@ -75,24 +73,13 @@ class BookControllerSpec extends AbstractBookControllerSpec {
         expected.getId().toString() == read(body, '$.id')
         expected.getTitle() == read(body, '$.title')
         expected.getIsbn() == read(body, '$.isbn')
+
+        and:
+        1 * bookFacade.findById(ID) >> expected
     }
 
     def "should return response with no book found message"() {
-        given:
-        BookNotFoundResponse response = new BookNotFoundResponse()
 
-        bookFacade.findById(_ as UUID) >> response
-
-        when:
-        def result = mockMvc.perform(get("/api/books/" + ID))
-
-        then:
-        def body = result.andReturn()
-                .getResponse()
-                .getContentAsString()
-
-        response.getMessage() == read(body, '$.message')
-
-        1 * bookFacade.findById(ID) >> response
     }
+
 }

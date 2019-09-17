@@ -20,7 +20,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import pl.solutions.software.sokolik.bartosz.book.domain.BookFacade;
@@ -79,7 +78,7 @@ public class BookControllerStandaloneSetupTest extends AbstractBookControllerTes
   @Test
   public void shouldReturnBookWithGivenId() throws Exception {
     //given
-    BookDto bookResponse = new BookDto(ID, "Title", "Isbn");
+    BookDto bookResponse = new BookDto(ID, TITLE, ISBN);
 
     when(bookFacade.findById(ID)).thenReturn(bookResponse);
 

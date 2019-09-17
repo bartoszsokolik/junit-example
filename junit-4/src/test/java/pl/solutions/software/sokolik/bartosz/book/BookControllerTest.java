@@ -75,7 +75,7 @@ public class BookControllerTest extends AbstractBookControllerTest {
   @Test
   public void shouldReturnBookWithGivenId() throws Exception {
     //given
-    BookDto bookResponse = new BookDto(ID, "Title", "Isbn");
+    BookDto bookResponse = new BookDto(ID, TITLE, ISBN);
 
     when(bookFacade.findById(ID)).thenReturn(bookResponse);
 
