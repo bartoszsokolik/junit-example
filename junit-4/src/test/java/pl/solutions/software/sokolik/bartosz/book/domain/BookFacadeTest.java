@@ -17,8 +17,6 @@ import pl.solutions.software.sokolik.bartosz.book.domain.dto.AddBookResponse;
 public class BookFacadeTest {
 
   private static final UUID ID = UUID.fromString("7b1ccba0-3fdc-4fef-a392-3f5f3eceb979");
-  private static final String TITLE = "Harry Potter";
-  private static final String ISBN = "1234";
 
   @Mock
   private InMemoryRepository<Book> bookRepository;
@@ -29,7 +27,7 @@ public class BookFacadeTest {
   @Test
   public void shouldAddBookToRepository() {
     //given
-    AddBookRequest request = new AddBookRequest(TITLE, ISBN);
+    AddBookRequest request = new AddBookRequest();
 
     AddBookResponse expected = new AddBookResponse(ID);
 

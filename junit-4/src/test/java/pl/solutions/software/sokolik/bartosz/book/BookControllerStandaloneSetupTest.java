@@ -30,7 +30,7 @@ import pl.solutions.software.sokolik.bartosz.book.domain.dto.BookDto;
 import pl.solutions.software.sokolik.bartosz.book.domain.dto.BookNotFoundResponse;
 
 @RunWith(MockitoJUnitRunner.class)
-@WebAppConfiguration
+//@WebAppConfiguration
 public class BookControllerStandaloneSetupTest extends AbstractBookControllerTest {
 
   @Mock
