@@ -18,34 +18,34 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @WebMvcTest(BookController.class)
-class BookControllerSpec extends AbstractBookControllerSpec {
+class BookControllerSpec extends AbstractBookControllerSpecification {
 
     @Autowired
-    private MockMvc mockMvc
+    MockMvc mockMvc
 
     @SpringBean
-    private BookFacade bookFacade = Mock()
+    BookFacade bookFacade = Mock()
 
     def "should create book"() {
         given:
         AddBookRequest request = new AddBookRequest()
-        AddBookResponse expected = new AddBookResponse(ID)
+        AddBookResponse expected = new AddBookResponse(id)
 
         and:
         bookFacade.addBook(_ as AddBookRequest) >> expected
 
         when:
         def result = mockMvc.perform(post("/api/books")
-                .contentType(APPLICATION_JSON)
-                .content(new JsonBuilder(request).toPrettyString()))
+            .contentType(APPLICATION_JSON)
+            .content(new JsonBuilder(request).toPrettyString()))
 
         then:
         result.andExpect(status().isCreated())
 
         and:
         def body = result.andReturn()
-                .getResponse()
-                .getContentAsString()
+            .getResponse()
+            .getContentAsString()
 
         expected.getId().toString() == read(body, '$.id')
         expected.getMessage() == read(body, '$.message')
@@ -56,20 +56,20 @@ class BookControllerSpec extends AbstractBookControllerSpec {
 
     def "should return book with given id"() {
         given:
-        BookDto expected = new BookDto(ID, TITLE, ISBN)
+        BookDto expected = new BookDto(id, title, isbn)
 
         bookFacade.findById(_ as UUID) >> expected
 
         when:
-        def result = mockMvc.perform(get("/api/books/" + ID))
+        def result = mockMvc.perform(get("/api/books/" + id))
 
         then:
         result.andExpect(status().isOk())
 
         and:
         def body = result.andReturn()
-                .getResponse()
-                .getContentAsString()
+            .getResponse()
+            .getContentAsString()
 
         expected.getMessage() == read(body, '$.message')
         expected.getId().toString() == read(body, '$.id')
@@ -84,15 +84,15 @@ class BookControllerSpec extends AbstractBookControllerSpec {
         bookFacade.findById(_ as UUID) >> response
 
         when:
-        def result = mockMvc.perform(get("/api/books/" + ID))
+        def result = mockMvc.perform(get("/api/books/" + id))
 
         then:
         def body = result.andReturn()
-                .getResponse()
-                .getContentAsString()
+            .getResponse()
+            .getContentAsString()
 
         response.getMessage() == read(body, '$.message')
 
-        1 * bookFacade.findById(ID) >> response
+        1 * bookFacade.findById(id) >> response
     }
 }
